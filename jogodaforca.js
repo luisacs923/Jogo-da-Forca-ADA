@@ -7,21 +7,21 @@
 
 const prompt = require('prompt-sync')();
 
-class GameController {
+class GameController { // classe principal do jogo
   constructor() {
-    this.player = new Player();
+    this.player = new Player(); 
     this.match = new Match();
     this.score = 0;
   }
 
-  startGame() {
-    this.match.chooseWord();
-    this.match.guessedLetters.clear();
+  startGame() { // após instanciar a classe GameController, o método startGame inicia o jogo
+    this.match.chooseWord(); //o método escolhe a palavra e dica aleatoriamente
+    this.match.guessedLetters.clear(); //limpa o objeto para uma nova partida
     this.match.matchWon = false;
-    this.player.attemptsLeft = this.player.maxAttempts;
-    this.score = 0;
+    this.player.attemptsLeft = this.player.maxAttempts; //reinicia para o valor de tentativas inicial (6 tentativas) 
+    this.score = 0; //limpa o score
     console.log("Bem vindo ao nosso jogo de forca de pokemón!");
-    this.play();
+    this.play(); //o método play inicia a partida
   }
 
   play() {
@@ -31,26 +31,26 @@ class GameController {
       console.log(`Tentativas: ${this.player.attemptsLeft}`);
       const guess = prompt("Escolha uma letra ou digite a palavra para chutar: ").toLowerCase();
       if (guess.length === 1) {
-        if (guess.charCodeAt(0) < 97 || guess.charCodeAt(0) > 122) {
+        if (guess.charCodeAt(0) < 97 || guess.charCodeAt(0) > 122) { // para não permitir numeros, e outros caracteres especiais
           console.log("Você não inseriu uma letra válida. Tente novamente.");
         }
-        else if (this.match.guessedLetters.has(guess)) {
+        else if (this.match.guessedLetters.has(guess)) { // para não permitir repetição de palpite
           console.log("Essa letra já foi palpitada! Tente novamente.");
         } else {
-          this.match.guessedLetters.add(guess);
+          this.match.guessedLetters.add(guess); 
           if (!this.match.currentWord.includes(guess)) {
-            this.player.reduceAttempts();
+            this.player.reduceAttempts(); //o usuário errou a tentativa de letra: o caractere guess não está na palavra escolhida, diminuir o valor de tentativas
           } else {
-            this.score += 10;
+            this.score += 10; //pontuação simples, caractere registrado no objeto guessedLetters
           }
         }
       } else {
-        if (guess === this.match.currentWord) {
+        if (guess === this.match.currentWord) { //pontuação especial para o acerto de palavra completa
           this.score += 50*this.match.countRemainingLetters();
           this.match.matchWon = true;
           break;
         } else {
-          this.player.reduceAttempts();
+          this.player.reduceAttempts(); //o usuário errou a tentativa de palavra, diminuir o valor de tentativas
         }
       }
     }
@@ -97,13 +97,13 @@ class Match {
     this.matchWon = false;
   }
 
-  chooseWord() {
-    const randomIndex = Math.floor(Math.random() * this.words.length);
+  chooseWord() { // o método chooseWord escolhe um objeto (com a palavra e dica) aleatoriamente
+    const randomIndex = Math.floor(Math.random() * this.words.length); // escolhe um numero de 0 até o tamanho do array words
     this.currentWord = this.words[randomIndex].word;
     this.currentHint = this.words[randomIndex].hint;
   }
 
-  displayWord() {
+  displayWord() { // o método itera em cada caractere da string, e enquanto o caractere não foi adivinhado, imprime um '_'
     let displayedWord = this.currentWord;
     for (let i = 0; i < displayedWord.length; i++) {
       if (!this.guessedLetters.has(displayedWord[i])) {
@@ -113,7 +113,7 @@ class Match {
     return displayedWord;
   }
 
-  finishedMatch() {
+  finishedMatch() { //se as letras da palavra escolhida estao contidas no objeto guessedLetters, então a partida acabou 
     for (let i = 0; i < this.currentWord.length; i++) {
       if (!this.guessedLetters.has(this.currentWord[i])){
         return false;
@@ -123,7 +123,7 @@ class Match {
     return true;
   }
 
-  countRemainingLetters() {
+  countRemainingLetters() { //método para a pontuação especial, se o palpite de palavra foi certo, o jogador ganha 50 ptos para cada letra que restava a ser adivinhada, ou seja, as letras que estão representadas pelo '_' 
     let number = 0;
     const displayedWord = this.displayWord();
     for (let i = 0; i < displayedWord.length; i++) {
@@ -137,15 +137,15 @@ class Match {
 
 class Player {
   constructor() {
-    this.maxAttempts = 6;
+    this.maxAttempts = 6; //número de tentativas inicia com 6
     this.attemptsLeft = this.maxAttempts;
   }
 
-  canGuess() {
+  canGuess() { //verifica se o jogador ainda tem tentativas
     return this.attemptsLeft > 0;
   }
 
-  reduceAttempts() {
+  reduceAttempts() { // ao errar um palpite, o método reduz a quantidade de tentativas
     this.attemptsLeft--;
   }
 }
